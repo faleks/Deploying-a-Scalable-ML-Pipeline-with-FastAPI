@@ -1,28 +1,96 @@
 import pytest
-# TODO: add necessary import
+import os
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from ml.data import process_data
+from ml.model import train_model, save_model, load_model, inference, compute_model_metrics
 
-# TODO: implement the first test. Change the function name and input as needed
-def test_one():
+@pytest.fixture
+def train_model_fixture():
     """
-    # add description for the first test
+    fixture using train_model.py to run tests
     """
-    # Your code here
-    pass
+    # load data
+    project_path = "/home/faleks/Deploying-a-Scalable-ML-Pipeline-with-FastAPI"
+    data_path = os.path.join(project_path, "data", "census.csv")
+    data = pd.read_csv(data_path)
+
+    # split data
+    train, test = train_test_split(data)
+
+    # process data
+    cat_features = [
+        "workclass",
+        "education",
+        "marital-status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native-country",
+    ]
+
+    X_train, y_train, encoder, lb = process_data(
+        train, categorical_features=cat_features,label="salary",training=True
+    )
+
+    X_test, y_test, _, _ = process_data(
+        test,
+        categorical_features=cat_features,
+        label="salary",
+        training=False,
+        encoder=encoder,
+        lb=lb,
+    )
+
+    # train model
+    model = train_model(X_train,y_train)
+
+    # save model
+    model_path = os.path.join(project_path, "model", "model.pkl")
+    save_model(model, model_path)
+
+    # load model
+    model = load_model(
+        model_path
+    ) 
+
+    return model, X_train, y_train, X_test, y_test
 
 
-# TODO: implement the second test. Change the function name and input as needed
-def test_two():
+def test_model_algorithm(train_model_fixture):
     """
-    # add description for the second test
+    Test if the ML model uses the expected algorithm
+    RandomForestClassifier is expected
     """
-    # Your code here
-    pass
+    model, _, _, _, _ = train_model_fixture
+    assert isinstance(model, RandomForestClassifier)
 
 
-# TODO: implement the third test. Change the function name and input as needed
-def test_three():
+def test_compute_model_metrics(train_model_fixture):
     """
-    # add description for the third test
+    Test if the computing metrics functions return the expected value
+    Precision: 0.7280 | Recall: 0.6321 | F1: 0.6767
     """
-    # Your code here
-    pass
+    model, X_train, y_train, X_test, y_test = train_model_fixture
+    preds = inference(model, X_test)
+    expected_precision = 0.7280
+    expected_recall = 0.6321
+    expected_fbeta = 0.6767
+    p, r, fb = compute_model_metrics(y_test, preds)
+    assert abs(p - expected_precision) < 0.01
+    assert abs(r - expected_recall) < 0.01
+    assert abs(fb - expected_fbeta) < 0.01
+
+
+def test_data_types(train_model_fixture):
+    """
+    Test if the data types of the datasets are as expected
+    """
+    model, X_train, y_train, X_test, y_test = train_model_fixture
+    assert isinstance(X_train, np.ndarray)
+    assert isinstance(y_train, np.ndarray)
+    assert isinstance(X_test, np.ndarray)
+    assert isinstance(y_test, np.ndarray)
