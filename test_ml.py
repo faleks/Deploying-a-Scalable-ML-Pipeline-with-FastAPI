@@ -13,7 +13,7 @@ def train_model_fixture():
     fixture using train_model.py to run tests
     """
     # load data
-    project_path = "/home/faleks/Deploying-a-Scalable-ML-Pipeline-with-FastAPI"
+    project_path = ""
     data_path = os.path.join(project_path, "data", "census.csv")
     data = pd.read_csv(data_path)
 
