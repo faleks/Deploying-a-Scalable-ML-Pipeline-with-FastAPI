@@ -13,14 +13,14 @@ from ml.model import (
     train_model,
 )
 # TODO: load the cencus.csv data
-project_path = "/home/faleks/Deploying-a-Scalable-ML-Pipeline-with-FastAPI"
+project_path = ""
 data_path = os.path.join(project_path, "data", "census.csv")
 print(data_path)
 data = pd.read_csv(data_path)
 
 # TODO: split the provided data to have a train dataset and a test dataset
 # Optional enhancement, use K-fold cross validation instead of a train-test split.
-train, test = train_test_split(data)
+train, test = train_test_split(data,random_state=32)
 
 # DO NOT MODIFY
 cat_features = [

@@ -18,7 +18,7 @@ def train_model_fixture():
     data = pd.read_csv(data_path)
 
     # split data
-    train, test = train_test_split(data)
+    train, test = train_test_split(data,random_state=32)
 
     # process data
     cat_features = [
@@ -72,13 +72,12 @@ def test_model_algorithm(train_model_fixture):
 def test_compute_model_metrics(train_model_fixture):
     """
     Test if the computing metrics functions return the expected value
-    Precision: 0.7280 | Recall: 0.6321 | F1: 0.6767
     """
     model, X_train, y_train, X_test, y_test = train_model_fixture
     preds = inference(model, X_test)
-    expected_precision = 0.7280
-    expected_recall = 0.6321
-    expected_fbeta = 0.6767
+    expected_precision = 0.7089285714285715
+    expected_recall = 0.6314952279957582
+    expected_fbeta = 0.667975322490185
     p, r, fb = compute_model_metrics(y_test, preds)
     assert abs(p - expected_precision) < 0.01
     assert abs(r - expected_recall) < 0.01
